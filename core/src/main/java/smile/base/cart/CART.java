@@ -27,13 +27,14 @@ import smile.data.vector.BaseVector;
 import smile.math.MathEx;
 import smile.sort.QuickSort;
 
+import java.io.Serializable;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.AbstractMap.SimpleEntry;
 
 /** Classification and regression tree. */
-public abstract class CART {
+public abstract class CART implements Serializable {
     private static final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(CART.class);
 
     /** The schema of data. */
@@ -43,7 +44,7 @@ public abstract class CART {
     protected StructField response;
 
     /** Design matrix formula */
-    protected Optional<Formula> formula = Optional.empty();
+    protected Formula formula;
 
     /** The root of decision tree. */
     protected Node root;
@@ -107,7 +108,7 @@ public abstract class CART {
 
     /** Constructor. */
     public CART(Optional<Formula> formula, StructType schema, StructField response, Node root, double[] importance) {
-        this.formula = formula;
+        this.formula = formula.isPresent() ? formula.get() : null;
         this.schema = schema;
         this.response = response;
         this.root = root;

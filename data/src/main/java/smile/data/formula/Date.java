@@ -17,11 +17,9 @@
 
 package smile.data.formula;
 
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.Month;
 import java.util.*;
 import java.util.stream.Collectors;
 import smile.data.Tuple;
@@ -127,7 +125,7 @@ class Date implements HyperTerm {
         /** The feature to be extracted. */
         DateFeature feature;
         /** The level of nominal scale. */
-        Optional<Measure> measure;
+        Measure measure;
 
         /**
          * Constructor.
@@ -138,17 +136,17 @@ class Date implements HyperTerm {
                 case MONTH: {
                     int[] values = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
                     String[] levels = {"JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"};
-                    measure = Optional.of(new NominalScale(values, levels));
+                    measure = new NominalScale(values, levels);
                     break;
                 }
                 case DAY_OF_WEEK: {
                     int[] values = {1, 2, 3, 4, 5, 6, 7};
                     String[] levels = {"MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"};
-                    measure = Optional.of(new NominalScale(values, levels));
+                    measure = new NominalScale(values, levels);
                     break;
                 }
                 default:
-                    measure = Optional.empty();
+                    measure = null;
             }
         }
 
@@ -225,7 +223,7 @@ class Date implements HyperTerm {
 
         @Override
         public Optional<Measure> measure() {
-            return measure;
+            return measure == null ? Optional.empty() : Optional.of(measure);
         }
 
         @Override

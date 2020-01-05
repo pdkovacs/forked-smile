@@ -311,20 +311,20 @@ public class RegressionTree extends CART implements Regression<Tuple>, DataFrame
         DataFrame x = formula.x(data);
         BaseVector y = formula.y(data);
         RegressionTree tree = new RegressionTree(x, Loss.ls(y.toDoubleArray()), y.field(), maxDepth, maxNodes, nodeSize, -1, null, null);
-        tree.formula = Optional.of(formula);
+        tree.formula = formula;
         return tree;
     }
 
     @Override
     public double predict(Tuple x) {
-        RegressionNode leaf = (RegressionNode) root.predict(formula.map(f -> f.x(x)).orElse(x));
+    	RegressionNode leaf = (RegressionNode) root.predict(formula == null ? x : formula.x(x));
         return leaf.output();
     }
 
     /** Returns null if the tree is part of ensemble algorithm. */
     @Override
     public Formula formula() {
-        return formula.orElse(null);
+        return formula;
     }
 
     @Override

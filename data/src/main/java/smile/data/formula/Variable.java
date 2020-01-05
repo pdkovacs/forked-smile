@@ -40,7 +40,7 @@ final class Variable implements Term {
     /** Data type of variable. Only available after calling bind(). */
     private DataType type;
     /** The level of measurements. */
-    private Optional<Measure> measure;
+    private Measure measure;
     /** Column index after binding to a schema. */
     private int index = -1;
 
@@ -54,7 +54,8 @@ final class Variable implements Term {
     }
 
     /** Returns the name of variable. */
-    public String name() {
+    @Override
+	public String name() {
         return name;
     }
 
@@ -121,7 +122,7 @@ final class Variable implements Term {
 
     @Override
     public Optional<Measure> measure() {
-        return measure;
+        return measure == null ? Optional.empty() : Optional.of(measure);
     }
 
     @Override
@@ -129,6 +130,6 @@ final class Variable implements Term {
         index = schema.fieldIndex(name);
         StructField field = schema.field(index);
         type = field.type;
-        measure = field.measure;
+        measure = field.measure.isPresent() ? field.measure.get() : null;
     }
 }

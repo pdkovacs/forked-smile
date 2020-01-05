@@ -23,6 +23,8 @@ import smile.data.measure.Measure;
 import smile.data.measure.NominalScale;
 import smile.data.vector.DoubleVector;
 
+import java.io.ObjectStreamException;
+import java.io.Serializable;
 import java.util.Optional;
 import java.util.stream.DoubleStream;
 
@@ -31,7 +33,7 @@ import java.util.stream.DoubleStream;
  *
  * @author Haifeng Li
  */
-public class StructField {
+public class StructField implements Serializable {
     /** Field name. */
     public final String name;
     /** Field data type. */
@@ -103,4 +105,26 @@ public class StructField {
 
         return false;
     }
+
+    private Object writeReplace() throws ObjectStreamException {
+        return new SerializableStructField(name, type, measure.isPresent() ? measure.get() : null);
+    }
+}
+
+
+final class SerializableStructField implements Serializable {
+	public final String name;
+	public final DataType type;
+	public final Measure measure;
+
+	public SerializableStructField(String name, DataType type, Measure measure) {
+		super();
+		this.name = name;
+		this.type = type;
+		this.measure = measure;
+	}
+
+	private Object readResolve() throws ObjectStreamException {
+		return new StructField(name, type, measure);
+	}
 }

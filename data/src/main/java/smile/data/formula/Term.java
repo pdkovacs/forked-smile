@@ -171,4 +171,8 @@ public interface Term extends HyperTerm {
             }
         }
     }
+
+    default boolean equals(Term other) {
+    	return terms().size() == other.terms().size() && variables().size() == other.variables().size() && name().equals(other.name()) && type().equals(other.type());
+    }
 }

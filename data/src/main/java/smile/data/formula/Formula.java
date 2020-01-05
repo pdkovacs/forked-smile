@@ -17,6 +17,7 @@
 
 package smile.data.formula;
 
+import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -487,4 +488,51 @@ public class Formula implements Serializable {
             return r.applyAsInt(t);
         }).orElse(-1);
     }
+
+    private Object writeReplace() throws ObjectStreamException {
+        return new SerializedFormula(response.isPresent() ? response.get() : null, predictors);
+    }
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + predictors.length;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Formula other = (Formula) obj;
+		if (predictors.length != other.predictors.length)
+			return false;
+		if (response == null) {
+			if (other.response != null)
+				return false;
+		} else if (!response.equals(other.response))
+			return false;
+		return true;
+	}
+
+}
+
+final class SerializedFormula implements Serializable {
+    private Term response = null;
+    private HyperTerm[] predictors;
+
+	public SerializedFormula(Term response, HyperTerm[] predictors) {
+		super();
+		this.response = response;
+		this.predictors = predictors;
+	}
+
+	private Object readResolve() throws ObjectStreamException {
+		return response == null ? new Formula(predictors) : new Formula(response, predictors);
+	}
 }

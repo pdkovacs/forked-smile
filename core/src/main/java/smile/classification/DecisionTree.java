@@ -55,9 +55,9 @@ import smile.util.IntSet;
  * is another popular measure, used by the ID3, C4.5 and C5.0 algorithms.
  * Information gain is based on the concept of entropy used in information
  * theory. For categorical variables with different number of levels, however,
- * information gain are biased in favor of those attributes with more levels. 
+ * information gain are biased in favor of those attributes with more levels.
  * Instead, one may employ the information gain ratio, which solves the drawback
- * of information gain. 
+ * of information gain.
  * <p>
  * Classification and Regression Tree techniques have a number of advantages
  * over many of those alternative techniques.
@@ -94,11 +94,11 @@ import smile.util.IntSet;
  * <p>
  * Some techniques such as bagging, boosting, and random forest use more than
  * one decision tree for their analysis.
- * 
+ *
  * @see AdaBoost
  * @see GradientTreeBoost
  * @see RandomForest
- * 
+ *
  * @author Haifeng Li
  */
 public class DecisionTree extends CART implements SoftClassifier<Tuple>, DataFrameClassifier {
@@ -337,14 +337,14 @@ public class DecisionTree extends CART implements SoftClassifier<Tuple>, DataFra
         ClassLabels codec = ClassLabels.fit(y);
 
         DecisionTree tree = new DecisionTree(x, codec.y, codec.field.get(), codec.k, rule, maxDepth, maxNodes, nodeSize, -1, null, null);
-        tree.formula = Optional.of(formula);
+        tree.formula = formula;
         tree.labels = Optional.of(codec.labels);
         return tree;
     }
 
     @Override
     public int predict(Tuple x) {
-        DecisionNode leaf = (DecisionNode) root.predict(formula.map(f -> f.x(x)).orElse(x));
+        DecisionNode leaf = (DecisionNode) root.predict(formula == null ? x : formula.x(x));
         int y = leaf.output();
         return labels.map($ -> $.valueOf(y)).orElse(y);
     }
@@ -357,7 +357,7 @@ public class DecisionTree extends CART implements SoftClassifier<Tuple>, DataFra
      */
     @Override
     public int predict(Tuple x, double[] posteriori) {
-        DecisionNode leaf = (DecisionNode) root.predict(formula.map(f -> f.x(x)).orElse(x));
+        DecisionNode leaf = (DecisionNode) root.predict(formula == null ? x : formula.x(x));
         leaf.posteriori(posteriori);
         int y = leaf.output();
         return labels.map($ -> $.valueOf(y)).orElse(y);
@@ -366,7 +366,7 @@ public class DecisionTree extends CART implements SoftClassifier<Tuple>, DataFra
     /** Returns null if the tree is part of ensemble algorithm. */
     @Override
     public Formula formula() {
-        return formula.orElse(null);
+        return formula;
     }
 
     @Override
@@ -375,8 +375,8 @@ public class DecisionTree extends CART implements SoftClassifier<Tuple>, DataFra
     }
 
     /** Private constructor. */
-    private DecisionTree(Optional<Formula> formula, StructType schema, StructField response, Node root, int k, SplitRule rule, double[] importance, Optional<IntSet> labels) {
-        super(formula, schema, response, root, importance);
+    private DecisionTree(Formula formula, StructType schema, StructField response, Node root, int k, SplitRule rule, double[] importance, Optional<IntSet> labels) {
+        super(formula == null ? Optional.empty() : Optional.of(formula), schema, response, root, importance);
         this.k = k;
         this.rule = rule;
         this.labels = labels;
@@ -388,7 +388,7 @@ public class DecisionTree extends CART implements SoftClassifier<Tuple>, DataFra
      * @return a new pruned tree.
      */
     public DecisionTree prune(DataFrame test) {
-        return prune(test, formula.get(), labels.get());
+        return prune(test, formula, labels.get());
     }
 
     /**
